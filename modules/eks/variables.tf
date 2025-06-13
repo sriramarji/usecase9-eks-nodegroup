@@ -36,3 +36,5 @@ variable "vpc_id" {
   description = "CIDR Range  to be used on VPC"
   type        = string
 }
+
+variable "eks_oidc_root_ca_thumbprint" {}
