@@ -79,5 +79,5 @@ jobs:
           kubectl get nodes                
       - name: Deployment + Service + Ingress
         run: |
-         sed -i 's@MY_CONTAINERIMAGE@'"${{ vars.ECR_REGISTRY }}/flask-app:${{ github.sha }}"'@' kubernetes/deployment.yml
-         kubectl apply -f kubernetes/deployment.yml
+         sed -i 's@MY_CONTAINERIMAGE@'"${{ vars.ECR_REGISTRY }}/flask-app:${{ github.sha }}"'@' k8s/deployment.yml
+         kubectl apply -f k8s/deployment.yml
