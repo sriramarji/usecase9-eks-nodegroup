@@ -45,3 +45,45 @@ jobs:
         run: |
           docker push ${{ vars.ECR_REGISTRY }}/$IMAGE_NAME:${{ github.sha }}
           docker push ${{ vars.ECR_REGISTRY }}/$IMAGE_NAME:latest
+
+  deploy:
+    name: Deploy App and ALB Ingress
+    needs: build-push-APiFlask
+    runs-on: ubuntu-latest
+
+    env:
+      CLUSTER_NAME: test-eks
+      AWS_REGION: us-east-1
+      NAMESPACE: default
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      
+      - name: Configure AWS credentials with OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::975049998898:role/githubaction-assumerole
+          role-session-name: github-assume
+          aws-region: us-east-1
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region us-east-1 --name demo-eks
+
+      - name: Verify Cluster Access
+        run: |
+          kubectl get nodes
+                
+
+      - name: Deployment + Service + Ingress
+        run: |
+         sed -i 's@MY_CONTAINERIMAGE@'"${{ vars.ECR_REGISTRY }}/flask-app:${{ github.sha }}"'@' kubernetes/deployment.yml
+         kubectl apply -f kubernetes/deployment.yml
+         kubectl apply -f kubernetes/ingress.yml
