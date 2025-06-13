@@ -15,7 +15,7 @@ jobs:
   build-push-APiFlask:
     runs-on: ubuntu-latest
     env:
-      IMAGE_NAME: flaskapp
+      IMAGE_NAME: myflask-application
     steps:
       - name: Checkout
         uses: actions/checkout@v4
