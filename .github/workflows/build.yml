@@ -14,6 +14,8 @@ permissions:
 jobs:
   build-push-APiFlask:
     runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: flaskapp
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,12 +31,17 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Ensure ECR Repository Exists
+        run: |
+          aws ecr describe-repositories --repository-names "$IMAGE_NAME" || \
+          aws ecr create-repository --repository-name "$IMAGE_NAME"
+
       - name: Build Docker Image 
         run: |
-          docker build -t ${{ vars.ECR_REGISTRY }}/flask-app:${{ github.sha }} ./ApiFlask
-          docker tag ${{ vars.ECR_REGISTRY }}/flask-app:${{ github.sha }} ${{ vars.ECR_REGISTRY }}/flask-app:latest
+          docker build -t ${{ vars.ECR_REGISTRY }}/$IMAGE_NAME:${{ github.sha }} ./ApiFlask
+          docker tag ${{ vars.ECR_REGISTRY }}/$IMAGE_NAME:${{ github.sha }} ${{ vars.ECR_REGISTRY }}/$IMAGE_NAME:latest
 
       - name: Push Docker Image 
         run: |
-          docker push ${{ vars.ECR_REGISTRY }}/flask-app:${{ github.sha }}
-          docker push ${{ vars.ECR_REGISTRY }}/flask-app:latest
+          docker push ${{ vars.ECR_REGISTRY }}/$IMAGE_NAME:${{ github.sha }}
+          docker push ${{ vars.ECR_REGISTRY }}/$IMAGE_NAME:latest
