@@ -63,7 +63,7 @@ jobs:
       - name: Configure AWS credentials with OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::975049998898:role/githubaction-assumerole
+          role-to-assume: arn:aws:iam::211125784755:role/uc1-alb-oidc
           role-session-name: github-assume
           aws-region: us-east-1
 
@@ -79,11 +79,9 @@ jobs:
 
       - name: Verify Cluster Access
         run: |
-          kubectl get nodes
-                
+          kubectl get nodes                
 
       - name: Deployment + Service + Ingress
         run: |
          sed -i 's@MY_CONTAINERIMAGE@'"${{ vars.ECR_REGISTRY }}/flask-app:${{ github.sha }}"'@' kubernetes/deployment.yml
          kubectl apply -f kubernetes/deployment.yml
-         kubectl apply -f kubernetes/ingress.yml
