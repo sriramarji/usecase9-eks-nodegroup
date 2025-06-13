@@ -24,7 +24,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::211125784755:role/uc1-alb-oidc
-          role-session-name: github-assume
+          #role-session-name: github-assume
           aws-region: us-east-1
 
       - name: Login to Amazon ECR # login ecr
@@ -64,7 +64,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::211125784755:role/uc1-alb-oidc
-          role-session-name: github-assume
+          #role-session-name: github-assume
           aws-region: us-east-1
 
       - name: Setup kubectl
