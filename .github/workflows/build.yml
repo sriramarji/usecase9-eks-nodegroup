@@ -1,4 +1,5 @@
 name: Build and Push
+
 on:
   push:
     paths:
@@ -35,13 +36,48 @@ jobs:
         run: |
           aws ecr describe-repositories --repository-names "$IMAGE_NAME" || \
           aws ecr create-repository --repository-name "$IMAGE_NAME"
-
       - name: Build Docker Image 
         run: |
           docker build -t ${{ vars.ECR_REGISTRY }}/$IMAGE_NAME:${{ github.sha }} ./ApiFlask
           docker tag ${{ vars.ECR_REGISTRY }}/$IMAGE_NAME:${{ github.sha }} ${{ vars.ECR_REGISTRY }}/$IMAGE_NAME:latest
-
       - name: Push Docker Image 
         run: |
           docker push ${{ vars.ECR_REGISTRY }}/$IMAGE_NAME:${{ github.sha }}
           docker push ${{ vars.ECR_REGISTRY }}/$IMAGE_NAME:latest
+  deploy:
+    name: Deploy App and ALB Ingress
+    needs: build-push-APiFlask
+    runs-on: ubuntu-latest
+
+    env:
+      CLUSTER_NAME: test-eks
+      AWS_REGION: us-east-1
+      NAMESPACE: default
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      
+      - name: Configure AWS credentials with OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::211125784755:role/uc1-alb-oidc
+          #role-session-name: github-assume
+          aws-region: us-east-1
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region us-east-1 --name test-eks
+      - name: Verify Cluster Access
+        run: |
+          kubectl get nodes                
+      - name: Deployment + Service + Ingress
+        run: |
+         sed -i 's@MY_CONTAINERIMAGE@'"${{ vars.ECR_REGISTRY }}/flask-app:${{ github.sha }}"'@' kubernetes/deployment.yml
+         kubectl apply -f kubernetes/deployment.yml
