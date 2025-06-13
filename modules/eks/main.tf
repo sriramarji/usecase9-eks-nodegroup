@@ -38,13 +38,13 @@ resource "aws_iam_openid_connect_provider" "oidc_provider" {
   url             = aws_eks_cluster.eks.identity[0].oidc[0].issuer
 
   tags = {
-      Name = "${var.name}-eks-irsa"
-    }
+    Name = "${var.name}-eks-irsa"
+  }
 }
 
 # Extract OIDC Provider from OIDC Provider ARN
 locals {
-    aws_iam_oidc_connect_provider_extract_from_arn = element(split("oidc-provider/", "${aws_iam_openid_connect_provider.oidc_provider.arn}"), 1)
+  aws_iam_oidc_connect_provider_extract_from_arn = element(split("oidc-provider/", "${aws_iam_openid_connect_provider.oidc_provider.arn}"), 1)
 }
 
 resource "aws_security_group" "eks" {

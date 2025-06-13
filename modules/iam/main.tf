@@ -65,11 +65,11 @@ resource "aws_iam_policy" "lbc_iam_policy" {
   name        = "${var.name}-AWSLoadBalancerControllerIAMPolicy"
   path        = "/"
   description = "AWS Load Balancer Controller IAM Policy"
-  policy = data.http.lbc_iam_policy.response_body
+  policy      = data.http.lbc_iam_policy.response_body
 }
 
 
- #Resource: Create IAM Role 
+#Resource: Create IAM Role 
 resource "aws_iam_role" "lbc_iam_role" {
   name = "${var.name}-lbc-iam-role"
 
@@ -86,10 +86,10 @@ resource "aws_iam_role" "lbc_iam_role" {
         }
         Condition = {
           StringEquals = {
-            "${var.aws_iam_openid_connect_provider_extract_from_arn}:aud": "sts.amazonaws.com",            
-            "${var.aws_iam_openid_connect_provider_extract_from_arn}:sub": "system:serviceaccount:kube-system:aws-load-balancer-controller"
+            "${var.aws_iam_openid_connect_provider_extract_from_arn}:aud" : "sts.amazonaws.com",
+            "${var.aws_iam_openid_connect_provider_extract_from_arn}:sub" : "system:serviceaccount:kube-system:aws-load-balancer-controller"
           }
-        }        
+        }
       },
     ]
   })
@@ -101,6 +101,6 @@ resource "aws_iam_role" "lbc_iam_role" {
 
 # Associate Load Balanacer Controller IAM Policy to  IAM Role
 resource "aws_iam_role_policy_attachment" "lbc_iam_role_policy_attach" {
-  policy_arn = aws_iam_policy.lbc_iam_policy.arn 
+  policy_arn = aws_iam_policy.lbc_iam_policy.arn
   role       = aws_iam_role.lbc_iam_role.name
 }
